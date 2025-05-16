@@ -1,0 +1,28 @@
+.error-page {
+  text-align: center;
+  margin-top: 50px;
+
+  h1 {
+    font-size: 80px;
+    color: #ff5733;
+  }
+
+  p {
+    font-size: 18px;
+    color: #333;
+  }
+
+  a {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #ff5733;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #e74c3c;
+    }
+  }
+}

@@ -1,0 +1,40 @@
+<div class="verify-otp-container">
+  
+    <div class="bigbrew-branding">
+      <img src="assets/bigbrew-logo.png" alt="BigBrew Logo" class="logo">
+    </div>
+
+    <div class="verify-otp-box">
+      <h2>VERIFY OTP</h2>
+      <p class="label">Please enter your OTP (One-Time Password) sent to your registered email to complete verification.</p>
+  
+      <input type="text" [(ngModel)]="otp" placeholder="Enter OTP" class="otp-input" />
+  
+      <p class="timer">Remaining Time: <span>{{ minutes }}:{{ seconds < 10 ? '0' + seconds : seconds }}</span></p>
+      <p class="resend-link">
+        Didn't receive a code?
+        <a
+          
+          (click)="resendOTP()"
+          [style.pointerEvents]="resendDisabled ? 'none' : 'auto'"
+          [style.opacity]="resendDisabled ? 0.5 : 1"
+        >
+          Resend OTP
+        </a>
+        <span *ngIf="resendDisabled">(Please wait {{ resendCountdown }}s)</span>
+      </p>
+      <button class="verify-btn" type="button" [disabled]="isVerifying" (click)="verifyOTP()">
+        <ng-container *ngIf="!isVerifying; else loadingTpl">Verify</ng-container>
+      </button>
+      
+      
+      <ng-template #loadingTpl>
+        <span class="loading-spinner"></span> Verifying...
+      </ng-template>
+      <button class="cancel-btn" (click)="cancel()">CANCEL</button>
+    </div>
+    <div class="footer">
+      <img src="assets/footer.jpg" alt="Footer Image" class="footer-img">
+    </div>
+  </div>
+  

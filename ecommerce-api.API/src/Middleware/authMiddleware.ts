@@ -1,49 +1,58 @@
-// Import required dependencies from express and jsonwebtoken
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config/db";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import { User } from "../models/user";
+import { IUser } from "../interface/userInterface";
+import AuthController from "../controllers/authController"; // ✅ Import for token blacklist check
 
-// Define the structure of JWT payload
-interface JwtPayload {
-  userId: string;
+dotenv.config(); // ✅ Load environment variables
+
+// ✅ Extend Express Request to include `userId` and `role`
+export interface AuthRequest extends Request {
+  userId?: string;
+  user?: IUser;
+  role?: string;
 }
 
-// Extend Express Request interface to include userId
-declare global {
-  namespace Express {
-    interface Request {
-      userId?: string;
-    }
-  }
-}
-
-export const authMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    // Extract the token from the Authorization header
-    // Format: "Bearer <token>"
     const token = req.headers.authorization?.split(" ")[1];
 
-    // If no token is provided, return 401 Unauthorized
     if (!token) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    // Verify the token using JWT_SECRET and cast the result to JwtPayload type
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    // 🔒 Check if token is blacklisted (Prevent reuse after logout)
+    if (AuthController.isTokenBlacklisted(token)) {
+      return res.status(403).json({ message: "Session expired. Please log in again." });
+    }
 
-    // Add the userId from the decoded token to the request object
-    // This makes the userId available to subsequent middleware and route handlers
-    req.userId = decoded.userId;
+    // 🔑 Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string; role: string };
+    } catch (error: any) {
+      return res.status(401).json({ message: error.name === "TokenExpiredError" ? "Token expired" : "Invalid token" });
+    }
 
-    // Continue to the next middleware or route handler
+    // 🔍 Find user by ID
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      console.error(`❌ User not found for ID: ${decoded.userId}`);
+      return res.status(401).json({ message: "User not found or unauthorized" });
+    }
+
+    // ✅ Convert `_id` to a string safely
+    req.userId = user._id instanceof mongoose.Types.ObjectId ? user._id.toHexString() : String(user._id);
+    req.user = user.toObject() as IUser;
+    req.role = user.role;
+
+    console.log(`🔍 [DEBUG] authMiddleware - User ID: ${req.userId}, Role: ${req.role}`);
+
     next();
   } catch (error) {
-    // If token verification fails, return 401 Unauthorized
+    console.error("❌ Error in authMiddleware:", error);
     res.status(401).json({ message: "Invalid token" });
   }
 };
-

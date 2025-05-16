@@ -4,6 +4,7 @@ import { authMiddleware } from "../Middleware/authMiddleware";
 import { createBaseRoutes } from "../routes/baseroutes";  // Assuming createBaseRoutes is in utils
 import { validateCategoryMiddleware } from "../validations/categoryvalidation";
 
+
 // Initialize express Router
 const router = express.Router();
 const categoryController = new CategoryController();
@@ -234,5 +235,9 @@ router.use(`/api/${apiVersionV1}/category`, authMiddleware, createBaseRoutes(cat
 
 // v2 - With validation
 router.use(`/api/${apiVersionV2}/category`, authMiddleware, validateCategoryMiddleware, createBaseRoutes(categoryController));
+// ✅ Direct category routes used by Angular admin-dashboard (e.g. /api/categories)
+ router.get("/api/categories", authMiddleware, (req, res) => categoryController.get(req, res));
+router.post("/api/categories", authMiddleware, validateCategoryMiddleware, (req, res) => categoryController.create(req, res));
+router.delete("/api/categories/:id", authMiddleware, (req, res) => categoryController.delete(req, res));
 
 export default router;

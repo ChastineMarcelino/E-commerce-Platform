@@ -1,0 +1,264 @@
+<div class="main-content">
+  <div class="admin-dashboard">
+    <aside class="sidebar">
+      <div class="ribbon">
+        <img src="assets/logo.png" alt="">
+      </div>
+      <div class="logo">
+        <img src="assets/icon.png" alt="BigBrew Logo" (click)="showPopup()">
+      </div>
+      <p class="admin-user"> {{ adminName }}</p>
+
+      <nav>
+        <button [class.active]="currentTab === 'home'" (click)="currentTab = 'home'"><i class="fas fa-home"></i> Home</button>
+        <button [class.active]="currentTab === 'user'" (click)="currentTab = 'user'"><i class="fas fa-users"></i> User</button>
+        <button [class.active]="currentTab === 'inventory'" (click)="currentTab = 'inventory'"><i class="fas fa-box"></i> Inventory</button>
+        <button [class.active]="currentTab === 'orders'" (click)="currentTab = 'orders'"><i class="fas fa-shopping-cart"></i> Orders</button>
+        <button [class.active]="currentTab === 'category'" (click)="currentTab = 'category'">
+          <i class="fas fa-folder"></i> Category
+        </button>
+      </nav>
+    </aside>
+
+    <div *ngIf="isPopupVisible" class="popup">
+      <span class="popup-close" (click)="hidePopup()">&times;</span>
+      <div class="popup-icon"><img src="assets/icon.png" alt=""></div>
+      <div>ADMIN USER</div>
+<div>{{ adminName }}</div>
+<div>{{ adminAddress }}</div>
+
+            <button class="popup-button"(click)="logout()">Logout</button>
+    </div>
+
+    <main class="dashboard-content">
+      <ng-container *ngIf="currentTab === 'home'">
+        <div class="dashboard-welcome">
+          <h2>EMPOWER OPERATIONS, ENSURE QUALITY, AND DELIVER EXCELLENCE</h2>
+          <p>Step into the heart of BigBrew’s management. From real-time updates to performance insights, this dashboard is designed to help you lead with precision and keep every brew on point.</p>
+          <img src="assets/bigbrew-logo.png" alt="BigBrew Logo" class="logo-image">
+          <button (click)="currentTab = 'user'" class="btn-manage-now">Manage Now!!</button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="currentTab === 'user'">
+        <div class="left-section">
+          <section class="notice-approval">
+            <h2>Users Pending Approval</h2>
+
+            <div *ngIf="isLoading" class="loading">Loading users...</div>
+            <div *ngIf="pendingUsers.length === 0 && !isLoading">
+              <p>No users pending approval.</p>
+            </div>
+
+            <div class="user-list">
+              <div class="user-card" *ngFor="let user of pendingUsers">
+                <div class="user-details">
+                  <p class="email">{{ user.email }}</p>
+                  <p class="request-text">This user is requesting approval</p>
+                </div>
+                <input type="text" placeholder="Enter Name" [(ngModel)]="user.name">
+                <select [(ngModel)]="user.role">
+                  <option value="" disabled selected>Select Role</option>
+                  <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                </select>
+                <div class="action-buttons">
+                  <button class="approve" (click)="approveUser(user)">Approve</button>
+                  <button class="reject" (click)="rejectUser(user)">Reject</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+<!-- Staff Info Popup -->
+<div class="popup" *ngIf="selectedStaff">
+  <span class="popup-close" (click)="closeStaffPopup()">&times;</span>
+  <div class="popup-icon"><img src="assets/icon.png" alt=""></div>
+  <div>{{ selectedStaff.name }}</div>
+  <div>{{ selectedStaff.role }}</div>
+  <div>{{ selectedStaff.email }}</div>
+  <div *ngIf="selectedStaff.address">{{ selectedStaff.address }}</div>
+  <button class="popup-button" (click)="deleteStaff(selectedStaff._id)">DELETE</button>
+</div>
+
+        <aside class="staff-members">
+          <h2>Staff Members</h2>
+          <div class="staff-list">
+            <div *ngIf="staffMembers.length === 0">
+              <p>No staff members available.</p>
+            </div>
+            <div class="staff-card" *ngFor="let staff of staffMembers" (click)="openStaffPopup(staff)">
+
+              <div class="profile">
+                <span class="profile-icon"></span>
+                <div class="staff-info">
+                  <strong>{{ staff.name }}</strong>
+                  <p class="role">{{ staff.role }}</p>
+                </div>
+              </div>
+             <!-- ✅ Only show dot if the user is online -->
+<span class="dot online" *ngIf="staff.isOnline"></span>
+
+
+            </div>
+          </div>
+        </aside>
+      </ng-container>
+
+      <ng-container *ngIf="currentTab === 'inventory'">
+        <div class="inventory-container">
+          <h2>Inventory Management</h2>
+
+          <div class="order-container">
+          <div class="orders-table-header">
+            <div class="custom-id">ID</div>
+            <div>Product</div>
+            <div>Category</div>
+            <div>Quantity</div>
+            <div>Unit</div>
+            <div>Price</div>
+            <div>Reorder Lvl</div>
+            <div>Status</div>
+            <div>Ordered Date</div>
+            <div>Action</div>
+          </div>
+        
+
+          <div class="order-row" *ngFor="let item of inventoryItems">
+            <div class="custom-id">{{ item._id }}</div>
+            <div>{{ item.name }}</div>
+            <div>{{ item.category }}</div>
+            <div>{{ item.quantity }}</div>
+            <div>{{ item.unit }}</div>
+            <div>₱{{ item.price }}</div>
+            <div>{{ item.reorderLevel }}</div>
+            <div [ngStyle]="{ color: item.quantity <= item.reorderLevel ? 'orange' : 'lime' }">
+              {{ item.quantity <= item.reorderLevel ? 'Low Stock' : 'In Stock' }}
+            </div>
+            <div>{{ item.createdAt | date: 'mediumDate' }}</div>
+            <div class="actions">
+              <button (click)="openEditInventoryModal(item)" class="icon-btn">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button (click)="deleteInventoryItem(item._id)" class="icon-btn">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        </div>
+      </ng-container>
+
+      
+      <!-- Inventory Edit Modal -->
+<div class="modal" *ngIf="showEditInventoryPopup">
+  <div class="modal-backdrop" (click)="closeEditInventoryModal()"></div>
+  <div class="modal-body">
+    <h3>Edit Inventory Item</h3>
+
+    <label>
+      Product Name:
+      <input type="text" [(ngModel)]="selectedInventoryItem.name" />
+    </label>
+
+    <label>
+      Category:
+      <input type="text" [(ngModel)]="selectedInventoryItem.category" />
+    </label>
+
+    <label>
+      Quantity:
+      <input type="number" [(ngModel)]="selectedInventoryItem.quantity" />
+    </label>
+
+    <label>
+      Unit:
+      <input type="text" [(ngModel)]="selectedInventoryItem.unit" />
+    </label>
+
+    <label>
+      Price:
+      <input type="number" [(ngModel)]="selectedInventoryItem.price" />
+    </label>
+
+    <label>
+      Reorder Level:
+      <input type="number" [(ngModel)]="selectedInventoryItem.reorderLevel" />
+    </label>
+
+    <div class="modal-actions">
+      <button class="save-btn" (click)="updateInventoryItem()">💾 Save</button>
+      <button class="cancel-btn" (click)="closeEditInventoryModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+      
+
+      <ng-container *ngIf="currentTab === 'orders'">
+        <div class="orders-container">
+          <h2>All Orders</h2>
+        
+        <div class="order-container"> 
+          <div class="orders-table-header">
+              <div>Order ID</div>
+              <div>Product</div>
+              <div>Amount / Size</div>
+              <div>Add-ons</div>
+              <div>Price</div>
+              <div>Status</div>
+              <div>Ordered Date</div>
+              <div>Action</div> <!-- moved to last column -->
+            </div>
+
+            <div class="order-row" *ngFor="let order of orders">
+              <div class="id">{{ order._id }}</div>
+              <div class="product-name">{{ order.product }}</div>
+              <div>{{ order.quantity }} {{ order.size }}</div>
+              <div>{{ order.addOns?.join(', ') || 'None' }}</div>
+              <div>₱{{ order.price }}</div>
+              <div>
+                <span class="status" [ngClass]="order.status === 'Pending' ? 'pending' : 'done'">
+                  {{ order.status }}
+                </span>
+              </div>
+              <div>{{ order.createdAt | date: 'mediumDate' }}</div>
+              <div class="actions">
+                <button (click)="deleteOrder(order._id)" class="icon-btn1">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+
+        </div>
+        </div>
+      </ng-container>
+
+     <ng-container *ngIf="currentTab === 'category'">
+  <div class="category-panel">
+    <h3>Category Management</h3>
+
+    <div class="category-form">
+      <input 
+        type="text" 
+        [(ngModel)]="newCategory" 
+        placeholder="New category..." 
+        required />
+      <button (click)="addCategory()">Add Category</button>
+    </div>
+
+    <div *ngIf="categories.length === 0" style="color: #aaa;">No categories found.</div>
+
+    <div class="category-container">
+    <div *ngFor="let category of categories" class="category-item">
+      <span>{{ category.categoryName }}</span>
+      <button (click)="deleteCategory(category._id)">Delete</button>
+    </div>
+  </div>
+  </div>
+</ng-container>
+
+      
+    </main>
+
+  
+</div>

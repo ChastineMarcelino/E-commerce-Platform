@@ -1,0 +1,177 @@
+<div class="orders-container">
+  <div class="header">
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="BigBrew Logo" class="logo" />
+    </div>
+    <nav>
+      <a href="home" class="active">Home</a>
+      <a href="products">Product</a>
+      <a href="orders">Orders</a>
+      <a href="inventory">Inventory</a>
+      <button class="profile-btn" (click)="showProfile()"><i class="fas fa-user"></i></button>
+    </nav>
+  </div>
+
+  <h2 class="title">ORDERS</h2>
+  <div class="search-wrapper">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      (input)="filterOrders()"
+      placeholder="Search"
+    />
+    <button><i class="fas fa-search"></i></button>
+  </div>
+
+  <div class="table-wrapper"></div>
+  <table class="orders-table">
+    
+    <thead>
+      <tr>
+        <th></th> 
+        <th>Order ID</th>
+        <th>Product</th>
+        <th>Amount / Size</th>
+        <th>Add ons</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Ordered Date</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of filteredOrders" [ngClass]="{ 'highlight-row': order.status === 'Done' }">
+        <td>
+          <input
+            type="checkbox"
+            [checked]="order.status === 'Done'"
+            (change)="toggleOrderStatus(order)"
+          />
+        </td>
+        <td class="order-id-cell">{{ order._id }}</td>
+    
+        <td class="highlighted-product">{{ order.product }}</td>
+        <td>{{ getAmountSizeLabel(order) }}</td>
+        <td>{{ getAddOns(order) }}</td>
+        <td>₱{{ getPrice(order) }}</td>
+        <td>
+          <span class="status" [ngClass]="{ 'pending': order.status === 'Pending', 'done': order.status === 'Done' }">
+            {{ order.status }}
+          </span>
+        </td>
+        <td>{{ order.date | date: 'MMMM d, y' }}</td>
+         <!-- ⋮ Three-dot menu -->
+         <td class="actions">
+          <!-- If this is not the open one, show 3 dots -->
+          <ng-container *ngIf="menuOpenId !== order._id">
+            <span class="dots-icon" (click)="toggleMenu(order._id)">
+              <i class="fas fa-ellipsis-v"></i>
+            </span>
+          </ng-container>
+        
+          <!-- If this is the active one, show edit/delete icons -->
+          <ng-container *ngIf="menuOpenId === order._id">
+            <div class="edit-actions">
+            <button class="icon-btn" (click)="openEditModal(order)">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="icon-btn" (click)="deleteOrder(order._id)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+          </ng-container>
+        </td>
+        
+      </tr>
+    </tbody>
+    <div class="edit-modal" *ngIf="showEditModal && selectedOrder">
+
+      <div class="modal-content">
+        <button class="close-btn" (click)="closeEditModal()">X</button>
+    
+        <div class="left">
+          <img [src]="selectedOrder.image" alt="Product" />
+        </div>
+    
+        <div class="right" *ngIf="selectedOrder">
+          <div class="form-group">
+            <label><strong>Product:</strong></label>
+            <input type="text" [value]="selectedOrder.product" disabled />
+          </div>
+    
+          <div class="form-group">
+            <label><strong>Quantity:</strong></label>
+            <input type="number" [(ngModel)]="selectedOrder.quantity" min="1" />
+          </div>
+    
+          <div class="form-group">
+            <label><strong>Size:</strong></label>
+            <select [(ngModel)]="selectedOrder.size">
+              <option value="16oz">Medio</option>
+              <option value="22oz">Grande</option>
+            </select>
+          </div>
+    
+          <div class="form-group">
+            <label><strong>Sugar Level:</strong></label>
+            <select [(ngModel)]="selectedOrder.sugarLevel">
+              <option value="25%">25%</option>
+              <option value="50%">50%</option>
+              <option value="75%">75%</option>
+              <option value="100%">100%</option>
+            </select>
+          </div>
+    
+          <div class="Add-ons">
+            <label><strong>Add-ons:</strong></label>
+            <div class="addons-options">
+              <label *ngFor="let addOn of availableAddOns">
+                <input
+                type="checkbox"
+                [checked]="selectedOrder['addOns'].includes(addOn)"
+                (change)="toggleAddOn(addOn)"
+              />
+                {{ addOn }}
+              </label>
+            </div>
+          </div>
+    
+          <div class="form-group2">
+            <label><strong>Status:</strong></label>
+            <select [(ngModel)]="selectedOrder.status">
+              <option value="Pending">Pending</option>
+              <option value="Done">Done</option>
+            </select>
+          </div>
+    
+          <p class="form-group2"><strong>Ordered Date:</strong> {{ selectedOrder.date | date: 'MMMM d, y' }}</p>
+          <p class="form-group2"><strong>Last Updated:</strong> {{ selectedOrder['updatedAt'] | date: 'MMMM d, y' }}</p>
+    
+          <div class="edit-actions">
+            <button class="save" (click)="saveOrderChanges()">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </table>
+</div>
+
+  <!-- Profile popup -->
+  <div *ngIf="showProfilePage" class="profile-page">
+    <div class="profile-content">
+      <img src="assets/icon.png" alt="">
+        <div class="profile-close-button" (click)="close()">
+            X
+        </div>
+        <h2>User Profile</h2>
+        <p><strong>Name:</strong><br> {{ userName }}</p>
+        <p><strong>Email:</strong> <br>{{ userEmail }}</p>
+        <p><strong>Address:</strong> <br>{{ userAddress }}</p>
+        
+        <div class="prof-button">
+          <button (click)="logout()">Logout</button>
+        </div>
+  
+    </div>
+  </div>

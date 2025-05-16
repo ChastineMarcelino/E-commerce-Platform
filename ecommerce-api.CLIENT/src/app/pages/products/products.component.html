@@ -1,0 +1,219 @@
+<div class="products-container">
+  <!-- Header Section -->
+  <div class="header">
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="BigBrew Logo" class="logo" />
+    </div>
+    <nav>
+      <a href="home">Home</a>
+      <a href="products" class="active">Product</a>
+      <a href="orders">Orders</a>
+      <a href="inventory">Inventory</a>
+      <div class="profile-icon" (click)="showProfile()">
+        <i class="fas fa-user"></i>
+    </div>
+    </nav>
+  </div>
+
+ <div class="category-tabs">
+  <button 
+    [class.active]="selectedCategory === ''" 
+    (click)="filterByCategory('')">All</button>
+
+  <button 
+    *ngFor="let category of categories"
+    [class.active]="selectedCategory === category.categoryName"
+    (click)="filterByCategory(category.categoryName)">
+    {{ category.categoryName }}
+  </button>
+</div>
+
+  <!-- Search Bar Section -->
+  <div class="search-container">
+    <input type="text" placeholder="Search" [(ngModel)]="searchQuery" (input)="filterProducts()" />
+    <button><i class="fas fa-search"></i></button>
+  </div>
+
+  <h2 class="category-title"></h2>
+
+  <!-- Product Carousel -->
+  <div class="product-carousel-container">
+    <button class="carousel-arrow left" (click)="scrollLeft()" *ngIf="leftArrowVisible">‹</button>
+    <div #carousel class="product-carousel">
+      <div class="product-card" *ngFor="let product of filteredProducts" (click)="openOrderModal(product)">
+        <span class="price-tag">PRICE {{ product.medioPrice }} / {{ product.grandePrice }}</span>
+        <img [src]="product.imageUrl" alt="{{ product.name }}" />
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+
+        <!-- Edit Button -->
+        <button class="edit-btn" (click)="editProduct(product); $event.stopPropagation()">
+          <i class="fas fa-edit"></i>
+        </button>
+
+        <!-- Delete Button -->
+        <button class="delete-btn" (click)="deleteProduct(product.id); $event.stopPropagation()">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+    </div>
+    <button class="carousel-arrow right" (click)="scrollRight()" *ngIf="rightArrowVisible">›</button>
+  </div>
+
+  <!-- Add Product Button -->
+  <button class="add-product-btn" (click)="toggleAddProduct()">+ Add Product</button>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<div class="modal" *ngIf="isModalVisible">
+  <div class="modal-content">
+    <form (ngSubmit)="onSubmit()">
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Product' : 'Add Product' }}</h2>
+        <button type="button" class="close-btn" (click)="toggleAddProduct()">X</button>
+      </div>
+      <div class="modal-body">
+        <label for="productName">Product Name:</label><br>
+        <input type="text" id="productName" [(ngModel)]="newProduct.name" name="productName" required /> <br>
+
+        <label for="medioPrice">Medio Price:</label><br>
+        <input type="number" id="medioPrice" [(ngModel)]="newProduct.medioPrice" name="medioPrice" required /> <br>
+
+        <label for="grandePrice">Grande Price:</label><br>
+        <input type="number" id="grandePrice" [(ngModel)]="newProduct.grandePrice" name="grandePrice" required /> <br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" [(ngModel)]="newProduct.description" name="description"></textarea> <br>
+
+        <label for="category">Category:</label> <br>
+       <select id="category" [(ngModel)]="newProduct.category" name="category">
+  <option *ngFor="let cat of categories" [value]="cat.categoryName">
+  {{ cat.categoryName }}
+</option>
+</select><br>
+
+        <label for="inStock">In Stock:</label><br>
+        <input type="number" id="inStock" [(ngModel)]="newProduct.inStock" name="inStock" required /><br>
+
+        <!-- Image Upload -->
+        <input type="file" id="image" (change)="onImageChange($event)" accept="image/*" /> <br>
+
+        <!-- Preview Image -->
+        <div *ngIf="imagePreview || newProduct.imageUrl">
+          <h4>Image Preview:</h4>
+          <img [src]="imagePreview || newProduct.imageUrl" alt="Image Preview" style="max-width: 100px; margin-top: 10px;" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" (click)="toggleAddProduct()">Cancel</button>
+        <button type="submit">{{ isEditMode ? 'Update Product' : 'Add Product' }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Order Product Modal -->
+<div class="modal" *ngIf="selectedProductForOrder">
+  <div class="modal-content order-modal">
+    <h2 class="product-title">{{ selectedProduct?.name }}</h2>
+
+    <div class="left">
+      <img class="product-image" [src]="selectedProductForOrder.imageUrl" alt="product image" /> <br>
+      <label>Add-ons:</label>
+      <div class="addons">
+        <label *ngFor="let addon of addOns">
+          <input type="checkbox" [value]="addon" (change)="toggleAddon(addon, $event)" /> {{ addon }}
+        </label>
+      </div>
+    </div>
+    <div class="right">
+      <h2>{{ selectedProductForOrder.name }}</h2>
+
+      <label>Sugar Level:</label>
+      <div class="options">
+        <button *ngFor="let level of sugarLevels" [class.active]="selectedSugar === level" (click)="selectSugar(level)">
+          {{ level }}
+        </button>
+      </div>
+
+      <label>Size:</label>
+      <div class="options">
+        <button *ngFor="let size of sizes" [class.active]="selectedSize === size" (click)="selectSize(size)">
+          {{ size }}
+        </button>
+      </div>
+
+      <label>Amount:</label>
+      <div class="quantity">
+        <button (click)="decreaseQty()">-</button>
+        <span>{{ quantity }}</span>
+        <button (click)="increaseQty()">+</button>
+      </div>
+
+      <button class="place-order-btn" (click)="placeOrder()">Place Order</button>
+      <button class="close-btn" (click)="closeOrderModal()">X</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showProfilePage" class="profile-page">
+    <div class="profile-content">
+      <img src="assets/icon.png" alt="">
+        <div class="profile-close-button" (click)="close()">
+            X
+        </div>
+        <h2>User Profile</h2>
+        <p><strong>Name:</strong><br> {{ userName }}</p>
+        <p><strong>Email:</strong> <br>{{ userEmail }}</p>
+        <p><strong>Address:</strong> <br>{{ userAddress }}</p>
+        
+        <div class="prof-button">
+          <button (click)="logout()">Logout</button>
+        </div>
+  
+    </div>
+  </div>
+
+
+<!-- ORDER CART SIDEBAR -->
+<div class="cart-sidebar" *ngIf="showCartSidebar">
+  <button class="close-sidebar-btn" (click)="closeCartSidebar()">✖</button>
+
+  <h3>Order Summary</h3>
+  <div *ngIf="orderCart.length === 0">No items yet.</div>
+  
+  <div *ngFor="let item of orderCart; let i = index" class="cart-item">
+    <strong>{{ item.product.name }}</strong> ({{ item.size }})<br />
+    Qty: {{ item.quantity }} | ₱{{ item.unitPrice }} each<br />
+    Add-ons: {{ item.addOns.join(', ') || 'None' }}<br />
+    Subtotal: ₱{{ item.unitPrice * item.quantity }}
+    <div class="cart-actions">
+      <button (click)="placeSingleOrder(item, i)">Place Order</button>
+      <button (click)="removeFromCart(i)">Remove</button>
+    </div>
+    <hr />
+  </div>
+
+  <div class="cart-total">
+    <strong>Total: ₱{{ getCartTotal() }}</strong>
+  </div>
+
+  <button 
+    class="remove-all-btn" 
+    [disabled]="orderCart.length === 0" 
+    (click)="removeAllFromCart()"
+  >
+    🗑 Remove All
+  </button>
+
+  <button 
+    class="checkout-btn" 
+    [disabled]="orderCart.length === 0" 
+    (click)="placeAllOrders()"
+  >
+    🧾 Place All Orders
+  </button>
+
+  
+</div>

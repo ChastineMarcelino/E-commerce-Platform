@@ -1,0 +1,70 @@
+<div class="home-container">
+  <div class="header">
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="BigBrew Logo" class="logo" />
+    </div>
+    <nav>
+      <a href="#">Home</a>
+      <a href="products">Product</a>
+      <a href="orders">Orders</a>
+      <a href="inventory">Inventory</a>
+      <div class="profile-icon" (click)="showProfile()">
+        <i class="fas fa-user"></i>
+    </div>
+    </nav>
+  </div>
+
+  <div class="bigbrew-branding">
+    <div>
+      <img src="assets/29.png" alt="" class="bglogo2">
+    </div>
+    <img src="assets/logo.png" alt="BigBrew Logo" class="bglogo">
+    <div>
+      <img src="assets/39.png" alt="" class="bglogo3">
+    </div>
+  </div>
+  <div class="label-container">
+    <img src="assets/label.png" alt="" class="label">
+  </div>
+
+  <div class="main-content">
+    <div class="image-section">
+      <img src="assets/MILKTEA.png" alt="BigBrew Milk Tea" class="product-image" />
+      <img src="assets/leaf.png" alt="BigBrew Milk Tea" class="product-image2" />
+    </div>
+
+    <button class="btn-get-started" ><a href="products">GET STARTED</a></button>
+  </div>
+
+  <div class="footer">
+    <img src="assets/footer.jpg" alt="Footer Image" class="footer-img">
+  </div>
+
+  <div *ngIf="showProfilePage" class="profile-page">
+    <div class="profile-content">
+      <label for="profilePicInput" class="upload-label">
+        <img
+  [src]="userImageUrl || 'assets/icon.png'"
+  alt="Profile"
+  class="profile-picture"
+/>
+
+      </label>
+      <input id="profilePicInput" type="file" hidden (change)="uploadProfileImage($event)" />
+
+        <div class="profile-close-button" (click)="close()">
+            X
+        </div>
+        <h2>User Profile</h2>
+        <p><strong>Name:</strong><br> {{ userName }}</p>
+        <p><strong>Email:</strong> <br>{{ userEmail }}</p>
+        <p><strong>Address:</strong> <br>{{ userAddress }}</p>
+        
+        <div class="prof-button">
+          <button (click)="logout()">Logout</button>
+
+        </div>
+
+    </div>
+</div>
+</div>

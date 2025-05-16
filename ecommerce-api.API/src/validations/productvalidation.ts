@@ -1,4 +1,5 @@
-import Joi from "joi"; // Import Joi validation library
+import Joi from "joi";
+import { Request, Response, NextFunction } from "express";
 
 /**
  * @swagger
@@ -18,51 +19,32 @@ import Joi from "joi"; // Import Joi validation library
  *         productID:
  *           type: string
  *           description: Unique identifier for the product
- *           example: "P12345"
  *         name:
  *           type: string
  *           maxLength: 100
- *           description: Name of the product
- *           example: "Wireless Mouse"
  *         description:
  *           type: string
  *           maxLength: 500
- *           description: Detailed description of the product
- *           example: "A compact and reliable wireless mouse with ergonomic design."
  *         category:
  *           type: string
  *           maxLength: 50
- *           description: Category the product belongs to
- *           example: "Electronics"
  *         price:
  *           type: number
- *           format: float
- *           description: Price of the product
- *           example: 29.99
  *         stockQuantity:
  *           type: integer
- *           description: Quantity of the product available in stock
- *           example: 150
  *         supplierID:
  *           type: string
- *           description: Reference to the supplier providing the product
- *           example: "SUP45678"
  *         createdAt:
  *           type: string
  *           format: date-time
- *           description: Timestamp for when the product was added
- *           example: "2024-11-18T12:34:56Z"
  *         updatedAt:
  *           type: string
  *           format: date-time
- *           description: Timestamp for when the product details were last updated
- *           example: "2024-11-20T15:45:12Z"
  *     ValidationError:
  *       type: object
  *       properties:
  *         message:
  *           type: string
- *           description: Error message
  *         details:
  *           type: array
  *           items:
@@ -76,51 +58,66 @@ import Joi from "joi"; // Import Joi validation library
  *                   type: string
  */
 
-// Define a validation schema for product data
+// ✅ Joi validation schema for product
 const productValidationSchema = Joi.object({
-
-
-  // Name validation
   name: Joi.string().max(100).required().messages({
     "string.max": "Product name cannot exceed 100 characters",
     "any.required": "Product name is required",
   }),
 
-  // Description validation
   description: Joi.string().max(500).required().messages({
     "string.max": "Description cannot exceed 500 characters",
     "any.required": "Description is required",
   }),
 
-  // Category validation
-  categoryId: Joi.string().max(50).required().messages({
+  category: Joi.string().max(50).required().messages({
     "string.max": "Category cannot exceed 50 characters",
     "any.required": "Category is required",
   }),
 
-  // Price validation
-  price: Joi.number().greater(0).required().messages({
-    "number.base": "Price must be a valid number",
-    "number.greater": "Price must be greater than 0",
-    "any.required": "Price is required",
+  medioPrice: Joi.number().greater(0).required().messages({
+    "number.base": "Medio price must be a valid number",
+    "number.greater": "Medio price must be greater than 0",
+    "any.required": "Medio price is required",
   }),
 
-  // Stock Quantity validation
-  stockQuantity: Joi.number().integer().min(0).required().messages({
+  grandePrice: Joi.number().greater(0).required().messages({
+    "number.base": "Grande price must be a valid number",
+    "number.greater": "Grande price must be greater than 0",
+    "any.required": "Grande price is required",
+  }),
+
+  inStock: Joi.number().integer().min(0).required().messages({
     "number.base": "Stock quantity must be a valid number",
     "number.min": "Stock quantity cannot be less than 0",
     "any.required": "Stock quantity is required",
   }),
-
-  // Supplier ID validation
-  supplierId: Joi.string().required().messages({
-    "any.required": "Supplier ID is required",
+  addOns: Joi.array().items(Joi.string()).optional().messages({
+    'array.base': 'Add-ons must be an array of strings'
   }),
 });
 
-// Helper function to validate product data
-export const validateProduct = (productData: any) => {
-  return productValidationSchema.validate(productData, { abortEarly: false });
+// ✅ Allow unknown fields (like id, image, imageUrl, price)
+export const validateProductData = (data: any) => {
+  return productValidationSchema.validate(data, {
+    abortEarly: false,
+    allowUnknown: true, // ✅ Prevents 400 for extra frontend fields
+  });
 };
 
-export default productValidationSchema;
+// ✅ Middleware for routes
+export const validateProductMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const { error } = validateProductData(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      message: "Validation error",
+      errors: error.details.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      })),
+    });
+  }
+
+  next();
+};

@@ -1,0 +1,149 @@
+.login-container {    
+    display: flex;    
+    justify-content: flex-end;     
+    align-items: center;    
+    height: 100vh;
+    width: 80%;    
+    padding-right: 20%;    
+    background-color: #000000; 
+    position: fixed;   
+  
+    // Outer brown border frame
+    &::before {       
+        content: "";       
+        position: absolute;       
+        top: 60px;       
+        left: 60px;       
+        width: calc(100% - 120px);       
+        height: calc(100% - 120px);       
+        border: 6px solid #BD702A;       
+        box-sizing: border-box;
+        pointer-events: none; // Prevents it from blocking clicks
+    }       
+  
+    &::after {       
+        content: "";       
+        position: absolute;       
+        bottom: 0;       
+        width: 100%;       
+        height: 120px; // Wooden flooring    
+    }
+    .footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 120px;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      transform: translate(20.4%, -120px);
+      z-index: 5;
+    }
+    
+    .footer-img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+    
+    .logo{
+      width: 800px;
+    }       
+  
+    .login-box {       
+        background: rgba(255, 136, 24, 0.7);      
+        padding: 20px;       
+        border-radius: 50px;       
+        text-align: center;       
+        color: white;       
+        width: 350px;       
+        height: 400px;       
+        border: solid 4px #000;  
+        position: relative; // Ensures it's above other elements
+        transform: translate(0%, -2%); // Centers it vertically
+        z-index: 10; // Ensures it's clickable
+        pointer-events: auto; // Enables clicking inside the box
+  
+        h2 {         
+            font-size: 40px;         
+            margin-bottom: 10px;         
+            font-family: Arial, sans-serif;         
+            font-weight: bold;         
+            padding-bottom: 20px;       
+        }  
+  
+        .input-field {         
+            width: 300px;         
+            padding: 10px;         
+            margin-bottom: 25px;         
+            border-radius: 50px;         
+            border: none;         
+            font-size: 16px;         
+            height: 30px;       
+        }  
+  
+        .options {         
+            display: flex;         
+            justify-content: space-between;         
+            font-size: 17px;         
+            padding-left: 20px;         
+            margin-bottom: 10px;         
+  
+            a {           
+                color: rgb(128, 191, 239);           
+                text-decoration: none;           
+                padding-right: 30px;           
+                margin-bottom: 10px;         
+            }       
+        }  
+  
+        .login-btn {         
+            width: 300px;         
+            padding: 10px;         
+            border-radius: 50px;         
+            border: none;         
+            font-size: 16px;         
+            background: #8B0000;         
+            color: white;         
+            height: 48px;         
+            cursor: pointer;         
+            font-weight: bold;         
+            font-size: 25px;         
+            text-align: center;         
+            border: solid 2px #000;       
+        }  
+  
+        .register-link {         
+            font-size: 17px;         
+            margin-top: 10px;  
+  
+            a {           
+                color: rgb(128, 191, 239);           
+                text-decoration: none;           
+                font-weight: bold;           
+                margin-bottom: 20px;          
+            }  
+            img {
+              display: block !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+            }
+          
+        }     
+    }   
+  }
+  .error-text {
+    color: #b71c1c; // 🔥 Bright error red
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 5px;
+    margin-left: 5px;
+  }
+  .error-text {
+    color: #b71c1c;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  }  
+  
+  
+  
+  

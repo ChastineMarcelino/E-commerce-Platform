@@ -1,0 +1,18 @@
+@use '@angular/material' as mat;
+
+// Define custom colors
+$bigbrew-primary: mat.define-palette(mat.$brown-palette, 800);
+$bigbrew-accent: mat.define-palette(mat.$amber-palette, A700);
+$bigbrew-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme
+$bigbrew-theme: mat.define-light-theme((
+  color: (
+    primary: $bigbrew-primary,
+    accent: $bigbrew-accent,
+    warn: $bigbrew-warn,
+  )
+));
+
+// Include Angular Material theme styles
+@include mat.all-component-themes($bigbrew-theme);

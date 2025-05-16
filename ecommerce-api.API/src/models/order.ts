@@ -1,28 +1,36 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-// Interface for OrderDetail
+// New Order Interface
 export interface IOrder extends Document {
-  OrderID: string;        // Foreign Key, links to Order
-  ProductID: string;      // Foreign Key, links to Product
-  Quantity: number;       // Quantity of the product in the order
-  Price: number;          // Price per unit of the product
-  createdAt?: Date;       // Timestamp when the order detail was created
-  updatedAt?: Date;       // Timestamp when the order detail was last updated
+  product: string;
+  image: string;
+  sugarLevel: string;
+  size: string;
+  quantity: number;
+  addOns: string[];
+  status: string;
+  date: Date;
+  price: number;
+  userId: mongoose.Types.ObjectId; // ✅ Add this
 }
 
-// Schema for OrderDetail
+// Schema for placed orders
 const OrderSchema = new Schema<IOrder>(
   {
-    OrderID: { type: String, required: true },
-    ProductID: { type: String, required: true },
-    Quantity: { type: Number, required: true, min: 0 },
-    Price: { type: Number, required: true, min: 0 },
+    product: { type: String, required: true },
+    image: { type: String },
+    sugarLevel: { type: String },
+    size: { type: String },
+    quantity: { type: Number, required: true,  min: 1  },
+    addOns: { type: [String], default: [] },
+    status: { type: String, enum: ['Pending', 'Done'], default: 'Pending' },
+    date: { type: Date, default: Date.now },
+    price: { type: Number, required: true },
+     // ✅ Add this line
+     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
   },
-  { timestamps: true } // Automatically adds `createdAt` and `updatedAt`
+  { timestamps: true }
 );
 
-// Model for OrderDetail
-export const Order: Model<IOrder> = mongoose.model<IOrder>(
-  'Order',
-  OrderSchema
-);
+// Final export
+export const Order: Model<IOrder> = mongoose.model<IOrder>('Order', OrderSchema);

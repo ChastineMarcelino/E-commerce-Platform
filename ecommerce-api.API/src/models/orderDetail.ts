@@ -21,6 +21,12 @@ const OrderDetailSchema = new Schema<IOrderDetail>(
   { timestamps: true } // Automatically adds `createdAt` and `updatedAt`
 );
 
+// **PRE-SAVE HOOK TO AUTO-CALCULATE TOTAL PRICE**
+OrderDetailSchema.pre("save", function (next) {
+  this.totalPrice = this.quantity * this.price;
+  next();
+});
+
 // Model for OrderDetail
 export const OrderDetail: Model<IOrderDetail> = mongoose.model<IOrderDetail>(
   "OrderDetail",

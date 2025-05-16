@@ -3,9 +3,6 @@ import { Request, Response, NextFunction } from "express";
 
 // Define Joi validation schema
 const categoryValidationSchema = Joi.object({
-  categoryId: Joi.string().required().messages({
-    "any.required": "Category ID is required",
-  }),
   categoryName: Joi.string().max(100).required().messages({
     "string.max": "Category name cannot exceed 100 characters",
     "any.required": "Category name is required",

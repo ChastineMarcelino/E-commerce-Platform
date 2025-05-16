@@ -1,9 +1,9 @@
 import express from "express";
-import { OrderController } from "../controllers/orderController";
+import { getMyOrders, OrderController } from "../controllers/orderController";
 import { authMiddleware } from "../Middleware/authMiddleware";
-import { createBaseRoutes } from "../routes/baseroutes"; // Assuming createBaseRoutes is in utils
+import { createBaseRoutes } from "../routes/baseroutes"; // Assuming createBaseRoutes is in routes
+import { Order } from "../models/order";
 
-// Initialize express Router
 const router = express.Router();
 const orderController = new OrderController();
 
@@ -21,49 +21,44 @@ const orderController = new OrderController();
  *     Order:
  *       type: object
  *       required:
- *         - OrderID
- *         - ProductID
- *         - Quantity
- *         - Price
+ *         - product
+ *         - quantity
+ *         - size
  *       properties:
- *         OrderID:
+ *         product:
  *           type: string
- *           description: Unique identifier for the order detail
- *         ProductID:
+ *           description: Name of the product
+ *         image:
  *           type: string
- *           description: Foreign key linking to the Product
- *         Quantity:
+ *           description: Image URL of the product
+ *         sugarLevel:
+ *           type: string
+ *           description: Selected sugar level (e.g., 25%, 50%, 100%)
+ *         size:
+ *           type: string
+ *           description: Size of the product (e.g., 16oz, 22oz)
+ *         quantity:
  *           type: integer
- *           description: Quantity of the product in the order
- *         Price:
- *           type: number
- *           description: Price per unit of the product
- *     OrderResponse:
- *       type: object
- *       properties:
- *         id:
+ *           description: Quantity ordered
+ *         addOns:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Optional add-ons
+ *         status:
  *           type: string
- *           description: Unique identifier of the order detail
- *         OrderID:
+ *           enum: [Pending, Done]
+ *           default: Pending
+ *         date:
  *           type: string
- *           description: Foreign key linking to the Order
- *         ProductID:
- *           type: string
- *           description: Foreign key linking to the Product
- *         Quantity:
- *           type: integer
- *           description: Quantity of the product in the order
- *         Price:
- *           type: number
- *           description: Price per unit of the product
+ *           format: date-time
+ *           description: Order placement date
  *         createdAt:
  *           type: string
  *           format: date-time
- *           description: Timestamp when the order detail was created
  *         updatedAt:
  *           type: string
  *           format: date-time
- *           description: Timestamp when the order detail was last updated
  *     ValidationError:
  *       type: object
  *       properties:
@@ -77,10 +72,8 @@ const orderController = new OrderController();
  *             properties:
  *               field:
  *                 type: string
- *                 description: The field that caused the validation error
  *               message:
  *                 type: string
- *                 description: Details about the validation error
  *     BearerAuth:
  *       type: http
  *       scheme: bearer
@@ -89,9 +82,9 @@ const orderController = new OrderController();
 
 /**
  * @swagger
- * /api/order:
+ * /api/v1/order:
  *   post:
- *     summary: Add a new order
+ *     summary: Place a new order
  *     tags: [Order]
  *     requestBody:
  *       required: true
@@ -105,7 +98,7 @@ const orderController = new OrderController();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/OrderResponse'
+ *               $ref: '#/components/schemas/Order'
  *       400:
  *         description: Validation error
  *         content:
@@ -114,48 +107,48 @@ const orderController = new OrderController();
  *               $ref: '#/components/schemas/ValidationError'
  *
  *   get:
- *     summary: Get all order 
+ *     summary: Get all orders
  *     tags: [Order]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: List of order 
+ *         description: List of all orders
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/OrderResponse'
+ *                 $ref: '#/components/schemas/Order'
  *
- * /api/order/{id}:
+ * /api/v1/order/{id}:
  *   get:
- *     summary: Get order  by ID
+ *     summary: Get an order by ID
  *     tags: [Order]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: Order  ID
+ *         description: Order ID
  *     responses:
  *       200:
- *         description: Order  
+ *         description: Order data
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/OrderResponse'
+ *               $ref: '#/components/schemas/Order'
  *       404:
- *         description: Order  not found
+ *         description: Order not found
  *
  *   put:
- *     summary: Update order 
+ *     summary: Update an order (e.g. mark as done)
  *     tags: [Order]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -175,32 +168,83 @@ const orderController = new OrderController();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/OrderResponse'
+ *               $ref: '#/components/schemas/Order'
  *       404:
- *         description: Order detail not found
+ *         description: Order not found
  *
  *   delete:
- *     summary: Delete order 
+ *     summary: Delete an order
  *     tags: [Order]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: OrderID
+ *         description: Order ID
  *     responses:
  *       204:
- *         description: Order detail deleted successfully
+ *         description: Order deleted successfully
  *       404:
- *         description: Order detail not found
+ *         description: Order not found
  */
+// ✅ Special route: GET /api/v1/my-orders
+router.get('/order/my-orders', authMiddleware, getMyOrders);
 
-/**
- * Apply the base routes to order routes
- */
-router.use("/api/v1/order", authMiddleware, createBaseRoutes(orderController));
-router.use("/api/v2/order", authMiddleware, createBaseRoutes(orderController));
+// ✅ PATCH order status - /api/v1/order/:id/status
+router.patch('/order/:id/status', authMiddleware, async (req, res) => {
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
+    if (!updatedOrder) return res.status(404).send('Order not found');
+    res.json(updatedOrder);
+  } catch (err) {
+    res.status(400).json({ message: 'Failed to update status', error: err });
+  }
+});
+
+// ✅ PUT to update order fully - /api/v1/order/:id
+router.put('/order/:id', authMiddleware, async (req, res) => {
+  try {
+    const updated = await Order.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          quantity: req.body.quantity,
+          size: req.body.size,
+          sugarLevel: req.body.sugarLevel,
+          addOns: req.body.addOns,
+          status: req.body.status,
+          updatedAt: req.body.updatedAt
+        }
+      },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: 'Update failed', error: err });
+  }
+});
+router.get("/admin/orders", authMiddleware, async (req: any, res) => {
+  try {
+    if (req.userRole !== 'ADMIN') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const orders = await Order.find().sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching all orders", error });
+  }
+});
+
+// ✅ Base controller routes: /api/v1/order (POST, GET all, GET by id, DELETE)
+router.use("/order", authMiddleware, createBaseRoutes(orderController));
+
 export default router;

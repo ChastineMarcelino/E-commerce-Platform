@@ -1,151 +1,83 @@
-import express from "express";
-import { CategoryController } from "../controllers/categoryController";
+import express, { Request } from "express";
+import multer from "multer";
+import path from "path";
 import { authMiddleware } from "../Middleware/authMiddleware";
-import { createBaseRoutes } from "../routes/baseroutes";  // Assuming createBaseRoutes is in utils
+import { createBaseRoutes } from "../routes/baseroutes";
+import { ProductController } from "../controllers/productController";
+import { validateProductMiddleware } from "../validations/productvalidation";
 
-// Initialize express Router
 const router = express.Router();
-const categoryController = new CategoryController();
+const productController = new ProductController();
 
+const apiVersionV1 = "v1";
+const apiVersionV2 = "v2";
+
+// ✅ MULTER SETUP
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    // Replace spaces with dashes and lowercase the filename
+    const sanitizedFilename = file.originalname.replace(/\s+/g, '-').toLowerCase();
+    cb(null, `${Date.now()}-${sanitizedFilename}`);
+  },
+});
+
+
+
+const upload = multer({ storage });
+// Extend the Request type to include the 'file' property
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
 /**
  * @swagger
  * tags:
- *   name: Category
- *   description: Category Management endpoints
+ *   name: Product
+ *   description: Product Management endpoints
  */
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     Category:
- *       type: object
- *       required:
- *         - categoryName
- *       properties:
- *         categoryName:
- *           type: string
- *           description: Name of the category
- *         description:
- *           type: string
- *           description: Description of the category
- *     CategoryResponse:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *           description: Unique identifier of the category
- *         categoryName:
- *           type: string
- *           description: Name of the category
- *         description:
- *           type: string
- *           description: Description of the category
- *         createdAt:
- *           type: string
- *           format: date-time
- *           description: Timestamp when the category was created
- *         updatedAt:
- *           type: string
- *           format: date-time
- *           description: Timestamp when the category was last updated
- *     ValidationError:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *           description: Error message
- *         errors:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               field:
- *                 type: string
- *                 description: The field that caused the validation error
- *               message:
- *                 type: string
- *                 description: Details about the validation error
- *     BearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * /api/product:
- *   post:
- *     summary: Add a new product
- *     tags: [Product]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/ProductItem'
- *     responses:
- *       201:
- *         description: Product created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ProductResponse'
- *       400:
- *         description: Validation error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ValidationError'
- *
+ * /api/{version}/product:
  *   get:
- *     summary: Get all products
+ *     summary: Get all products with sorting and filtering
  *     tags: [Product]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: page
+ *         name: sort
  *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Page number
+ *           type: string
+ *           example: price_asc
+ *         description: Sort products by price_asc, price_desc, name_asc, etc.
  *       - in: query
- *         name: limit
+ *         name: search
  *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 10
- *         description: Number of items per page
+ *           type: string
+ *         description: Full-text search by product name or description
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter products by category
  *     responses:
  *       200:
  *         description: List of products
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/ProductResponse'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     total:
- *                       type: integer
- *                     pages:
- *                       type: integer
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ProductResponse'
  */
+router.get(`/api/${apiVersionV1}/product`, authMiddleware, async (req, res) => {
+  productController.getProducts(req, res);
+});
 
 /**
  * @swagger
- * /api/product/{id}:
+ * /api/{version}/product/{id}:
  *   get:
  *     summary: Get product by ID
  *     tags: [Product]
@@ -167,7 +99,79 @@ const categoryController = new CategoryController();
  *               $ref: '#/components/schemas/ProductResponse'
  *       404:
  *         description: Product not found
- *
+ */
+router.get(`/api/${apiVersionV1}/product/:id`, authMiddleware, async (req, res) => {
+  productController.getProductById(req, res);
+});
+
+/**
+ * @swagger
+ * /api/{version}/product:
+ *   post:
+ *     summary: Add a new product
+ *     tags: [Product]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - description
+ *               - medioPrice
+ *               - grandePrice
+ *               - inStock
+ *               - category
+ *               - image
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               medioPrice:
+ *                 type: number
+ *               grandePrice:
+ *                 type: number
+ *               inStock:
+ *                 type: integer
+ *               category:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Product created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ */
+
+
+router.post(
+  `/api/${apiVersionV1}/product`,
+  authMiddleware,
+  upload.single("image"), // ✅ multer handles file upload
+  async (req: MulterRequest, res) => {
+    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file?.filename}`;
+    req.body.imageUrl = imageUrl;
+    productController.create(req, res);
+  }
+);
+
+/**
+ * @swagger
+ * /api/{version}/product/{id}:
  *   put:
  *     summary: Update product details
  *     tags: [Product]
@@ -195,7 +199,28 @@ const categoryController = new CategoryController();
  *               $ref: '#/components/schemas/ProductResponse'
  *       404:
  *         description: Product not found
- *
+ */
+router.put(
+  `/api/${apiVersionV1}/product/:id`,
+  authMiddleware,
+  upload.single("image"), // ✅ Added multer support to PUT route
+  async (req: MulterRequest, res) => {
+    try {
+      if (req.file) {
+        req.body.imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      }
+      productController.update(req, res);
+    } catch (error) {
+      console.error("❌ PUT Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      res.status(500).json({ message: "Internal server error", error: errorMessage });
+    }
+  }
+);
+
+/**
+ * @swagger
+ * /api/{version}/product/{id}:
  *   delete:
  *     summary: Delete product
  *     tags: [Product]
@@ -214,10 +239,16 @@ const categoryController = new CategoryController();
  *       404:
  *         description: Product not found
  */
+router.delete(`/api/${apiVersionV1}/product/:id`, authMiddleware, async (req, res) => {
+  productController.delete(req, res);
+});
 
-/**
- * Apply the base routes to category routes
- */
-router.use("/api/v1/categories", authMiddleware, createBaseRoutes(categoryController));
-router.use("/api/v2/categories", authMiddleware, createBaseRoutes(categoryController));
+// ✅ Version 2 routing
+router.use(
+  `/api/${apiVersionV2}/product`,
+  authMiddleware,
+  validateProductMiddleware,
+  createBaseRoutes(productController)
+);
+
 export default router;

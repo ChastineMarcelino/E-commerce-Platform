@@ -63,13 +63,13 @@ import Joi from "joi"; // Import Joi validation library
 const orderDetailValidationSchema = Joi.object({
   // OrderID validation
   // - Required field
-  OrderID: Joi.string().required().messages({
+  orderId: Joi.string().required().messages({
     "any.required": "Order ID is required",
   }),
 
   // ProductID validation
   // - Required field
-  ProductID: Joi.string().required().messages({
+  productId: Joi.string().required().messages({
     "any.required": "Product ID is required",
   }),
 
@@ -77,7 +77,7 @@ const orderDetailValidationSchema = Joi.object({
   // - Must be an integer
   // - Minimum value 1
   // - Required field
-  Quantity: Joi.number().integer().min(1).required().messages({
+  quantity: Joi.number().integer().min(1).required().messages({
     "number.base": "Quantity should be a number",
     "number.min": "Quantity should be greater than or equal to 1",
     "any.required": "Quantity is required",
@@ -87,14 +87,14 @@ const orderDetailValidationSchema = Joi.object({
   // - Must be a positive number
   // - Maximum of 2 decimal places
   // - Required field
-  Price: Joi.number().precision(2).positive().required().messages({
+  price: Joi.number().precision(2).positive().required().messages({
     "number.base": "Price should be a positive number",
     "number.precision": "Price should have a maximum of 2 decimal places",
     "any.required": "Price is required",
   }),
 
   // TotalPrice validation (calculated field: Quantity * Price)
-  TotalPrice: Joi.number().precision(2).positive().required().messages({
+  totalPrice: Joi.number().precision(2).positive().optional().messages({
     "number.base": "TotalPrice should be a positive number",
     "any.required": "TotalPrice is required",
   }),

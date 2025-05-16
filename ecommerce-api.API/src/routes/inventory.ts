@@ -1,11 +1,12 @@
 import express from "express";
 import { InventoryController } from "../controllers/controller";
 import { authMiddleware } from "../Middleware/authMiddleware";
-import { createBaseRoutes } from "../routes/baseroutes";  // Assuming createBaseRoutes is in utils
+import { validateInventoryMiddleware } from "../validations/inventoryvalidation";
+import { createBaseRoutes } from "./baseroutes";
 
-// Initialize express Router
 const router = express.Router();
 const inventoryController = new InventoryController();
+
 
 /**
  * @swagger
@@ -21,55 +22,55 @@ const inventoryController = new InventoryController();
  *     InventoryItem:
  *       type: object
  *       required:
- *         - itemName
+ *         - name
  *         - description
  *         - price
- *         - stockQuantity
+ *         - quantity
+ *         - category
+ *         - reorderLevel
  *       properties:
- *         itemName:
+ *         name:
  *           type: string
  *           description: Name of the inventory item
  *         description:
  *           type: string
- *           description: Detailed description of the inventory item
+ *           description: Description of the item
+ *         quantity:
+ *           type: integer
+ *           description: Quantity of the item in stock
  *         price:
  *           type: number
- *           description: Price of the inventory item
- *         stockQuantity:
+ *           description: Price per unit
+ *         category:
+ *           type: string
+ *           description: Category of the item
+ *         supplier:
+ *           type: string
+ *           description: Supplier name (optional)
+ *         reorderLevel:
  *           type: integer
- *           description: Available stock for the inventory item
+ *           description: Reorder threshold level
  *     InventoryResponse:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *           description: Unique identifier of the inventory item
- *         itemName:
- *           type: string
- *           description: Name of the inventory item
- *         description:
- *           type: string
- *           description: Detailed description of the inventory item
- *         price:
- *           type: number
- *           description: Price of the inventory item
- *         stockQuantity:
- *           type: integer
- *           description: Available stock for the inventory item
- *         createdAt:
- *           type: string
- *           format: date-time
- *           description: Timestamp when the item was created
- *         updatedAt:
- *           type: string
- *           format: date-time
- *           description: Timestamp when the item was last updated
+ *       allOf:
+ *         - $ref: '#/components/schemas/InventoryItem'
+ *         - type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             createdAt:
+ *               type: string
+ *               format: date-time
+ *             updatedAt:
+ *               type: string
+ *               format: date-time
+ *             status:
+ *               type: string
+ *               enum: [In Stock, Low Stock, Out of Stock]
  *     ValidationError:
  *       type: object
  *       properties:
  *         message:
  *           type: string
- *           description: Error message
  *         errors:
  *           type: array
  *           items:
@@ -77,25 +78,19 @@ const inventoryController = new InventoryController();
  *             properties:
  *               field:
  *                 type: string
- *                 description: The field that caused the validation error
  *               message:
  *                 type: string
- *                 description: Details about the validation error
  *     Pagination:
  *       type: object
  *       properties:
  *         total:
  *           type: integer
- *           description: Total number of items
  *         pages:
  *           type: integer
- *           description: Total number of pages for pagination
  *         page:
  *           type: integer
- *           description: Current page number
  *         limit:
  *           type: integer
- *           description: Number of items per page
  *     BearerAuth:
  *       type: http
  *       scheme: bearer
@@ -104,53 +99,28 @@ const inventoryController = new InventoryController();
 
 /**
  * @swagger
- * /api/inventory:
- *   post:
- *     summary: Add a new inventory item
- *     tags: [Inventory]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/InventoryItem'
- *     responses:
- *       201:
- *         description: Inventory item created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/InventoryResponse'
- *       400:
- *         description: Validation error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ValidationError'
- *
+ * /api/v1/inventory:
  *   get:
  *     summary: Get all inventory items
  *     tags: [Inventory]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *           minimum: 1
  *           default: 1
  *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *           minimum: 1
  *           default: 10
  *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of inventory items
+ *         description: A list of inventory items
  *         content:
  *           application/json:
  *             schema:
@@ -162,42 +132,65 @@ const inventoryController = new InventoryController();
  *                     $ref: '#/components/schemas/InventoryResponse'
  *                 pagination:
  *                   $ref: '#/components/schemas/Pagination'
+ * 
+ *   post:
+ *     summary: Add a new inventory item
+ *     tags: [Inventory]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/InventoryItem'
+ *     responses:
+ *       201:
+ *         description: Created inventory item
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/InventoryResponse'
+ *       400:
+ *         description: Validation Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
  *
- * /api/inventory/{id}:
+ * /api/v1/inventory/{id}:
  *   get:
  *     summary: Get inventory item by ID
  *     tags: [Inventory]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: Inventory item ID
  *     responses:
  *       200:
- *         description: Inventory item details
+ *         description: Found inventory item
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/InventoryResponse'
  *       404:
  *         description: Inventory item not found
- *
+ * 
  *   put:
- *     summary: Update inventory item details
+ *     summary: Update an inventory item
  *     tags: [Inventory]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: Inventory item ID
  *     requestBody:
  *       required: true
  *       content:
@@ -206,7 +199,7 @@ const inventoryController = new InventoryController();
  *             $ref: '#/components/schemas/InventoryItem'
  *     responses:
  *       200:
- *         description: Inventory item updated successfully
+ *         description: Updated inventory item
  *         content:
  *           application/json:
  *             schema:
@@ -218,23 +211,24 @@ const inventoryController = new InventoryController();
  *     summary: Delete inventory item
  *     tags: [Inventory]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: Inventory item ID
  *     responses:
  *       204:
- *         description: Inventory item deleted successfully
+ *         description: Item deleted
  *       404:
- *         description: Inventory item not found
+ *         description: Item not found
  */
 /**
- * Apply the base routes to inventory routes
+* Apply versioning to category routes
  */
-router.use("/api/v1/inventory", authMiddleware, createBaseRoutes(inventoryController));
-router.use("/api/v2/inventory", authMiddleware, createBaseRoutes(inventoryController));
+const apiVersionV1 = "v1";
+const apiVersionV2 = "v2";
+router.use(`/api/${apiVersionV1}/inventory`, authMiddleware, createBaseRoutes(inventoryController));
+router.use(`/api/${apiVersionV2}/inventory`, authMiddleware, validateInventoryMiddleware, createBaseRoutes(inventoryController));
 export default router;

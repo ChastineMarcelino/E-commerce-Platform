@@ -1,0 +1,53 @@
+<ngx-spinner
+  bdColor="rgba(0,0,0,0.6)"
+  size="medium"
+  color="#fff"
+  type="ball-spin-clockwise"
+  [fullScreen]="true">
+</ngx-spinner>
+
+<div class="register-container">
+  
+  <div class="bigbrew-branding">
+    <img src="assets/bigbrew-logo.png" alt="BigBrew Logo" class="logo">
+  </div>
+
+  <div class="register-box">
+    <h2>REGISTER</h2>
+
+    <div class="input-group">
+      <input type="text" placeholder="First Name" [(ngModel)]="user.firstName" name="firstName" required>
+    </div>
+
+    <div class="input-group">
+      <input type="text" placeholder="Last Name" [(ngModel)]="user.lastName" name="lastName" required />
+    </div>
+    <div class="input-group">
+      <input type="text" [(ngModel)]="user.address" placeholder="Address">
+    </div>
+    
+    <div class="input-group">
+      <input type="email" [(ngModel)]="user.email" placeholder="Email">
+    </div>
+    <div class="input-group">
+      <input type="password" [(ngModel)]="user.password" placeholder="Password">
+    </div>
+    <button class="register-btn" (click)="register()" [disabled]="isLoading">
+      <ng-container *ngIf="!isLoading; else loadingTpl">
+        REGISTER
+      </ng-container>
+    </button>
+    
+    <!-- Template must be in the same DOM context -->
+    <ng-template #loadingTpl>
+      <span class="loading-spinner"></span> Registering...
+    </ng-template>
+    
+    
+    <p class="login-link">Already have an account? <a href="/login">Login now</a></p>
+  </div>
+  
+  <div class="footer">
+    <img src="assets/footer.jpg" alt="Footer Image" class="footer-img">
+  </div>
+</div>

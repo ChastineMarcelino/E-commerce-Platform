@@ -2,6 +2,7 @@ import http from "http";
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import swaggerUi from "swagger-ui-express";
+import dotenv from "dotenv";
 import "./config/logging";
 import { DEVELOPMENT, mongo, server } from "./config/db";
 import inventory from "./routes/inventory";
@@ -11,32 +12,28 @@ import categoryRoutes from "./routes/categoryRoutes";
 import productRoutes from "./routes/productRoutes";
 import rolesRoutes from "./routes/rolesRoutes";
 import permissionRoutes from "./routes/permissionRoutes";
-import usermanagementRoutes from "./routes/usermanagementRoutes";
+import usermanagementRoutes from "./routes/userRoutes";
 import orderRoutes from "./routes/orderRoutes";
 import orderDetailRoutes from "./routes/orderDetailRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
+import supplierRoutes from "./routes/supplierRoutes";
 import authRoutes from "./routes/authRoutes";
+import webhookRoutes from "./routes/webhookRoutes";
 import "reflect-metadata";
-import { corsHandler } from "./Middleware/corsHandler";
+import cors from "cors";
 import { loggingHandler } from "./Middleware/loggingHandler";
 import { routeNotFound } from "./Middleware/routeNotFound";
 import { specs } from "./config/swagger";
+import { auditTrailMiddleware } from "./Middleware/auditTrailMiddleware"; // Import the middleware
+import userRoutes from "./routes/userRoutes";
+import path from "path";
+import defaultMaterialRoutes from "./routes/defaultMaterialRoutes";
 
-// Nodemailer and OTP-related setup
-import { transporter } from './nodemailerSetup';
-import { generateOTP } from './otpGenerator';
+
+dotenv.config();
 
 export const application = express();
 export let httpServer: ReturnType<typeof http.createServer>;
-
-interface OTPRecord {
-  otp: string;
-  expiresAt: number;
-}
-
-// In-memory OTP store (use Redis or a database in production)
-let pendingOTP: Record<string, OTPRecord> = {};
-const emailVerificationTimeout = 5 * 60 * 1000; // OTP expires in 5 minutes
 
 const Main = async () => {
   logging.log("----------------------------------------");
@@ -44,10 +41,13 @@ const Main = async () => {
   logging.log("----------------------------------------");
   application.use(express.urlencoded({ extended: true }));
   application.use(express.json());
+  application.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
 
   logging.log("----------------------------------------");
   logging.log("Swagger UI");
   logging.log("----------------------------------------");
+  application.use("/api", userRoutes);
   application.use(
     "/api/docs",
     swaggerUi.serve,
@@ -66,27 +66,26 @@ const Main = async () => {
       mongo.MONGO_CONNECTION,
       mongo.MONGO_OPTIONS
     );
-    logging.log("----------------------------------------");
-    logging.log("Connected to Mongo: ", connection.version);
-    logging.log("----------------------------------------");
+    logging.log("Connected to Mongo:", connection.version);
   } catch (error) {
-    logging.log("----------------------------------------");
-    logging.error(error);
-    logging.error("Unable to connect to Mongo");
-    logging.log("----------------------------------------");
+    logging.error("Unable to connect to Mongo", error);
   }
 
   logging.log("----------------------------------------");
   logging.log("Logging & Configuration");
   logging.log("----------------------------------------");
   application.use(loggingHandler);
-  application.use(corsHandler);
-
+  application.use(cors({
+    origin: "http://localhost:4200", // ✅ Allow Angular frontend
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
+  }));
+  application.use(auditTrailMiddleware);
   logging.log("----------------------------------------");
   logging.log("Define Controller Routing");
   logging.log("----------------------------------------");
 
-  // Your existing routes
+  // Existing routes
   application.use(inventory);
   application.use(transactionRoutes);
   application.use(shipmentRoutes);
@@ -98,68 +97,13 @@ const Main = async () => {
   application.use(rolesRoutes);
   application.use(permissionRoutes);
   application.use(usermanagementRoutes);
+  application.use(supplierRoutes);
   application.use(authRoutes);
+  application.use(webhookRoutes);
+  application.use("/api/v1", defaultMaterialRoutes);
+  
 
-  // OTP Routes
-  application.post('/login', async (req: Request, res: Response) => {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-
-    // Generate a new OTP
-    const otp = generateOTP();
-
-    // Store OTP temporarily (use in-memory store here; use Redis or DB in production)
-    pendingOTP[email] = { otp, expiresAt: Date.now() + emailVerificationTimeout };
-
-    // Send OTP to the user's email
-    try {
-      await transporter.sendMail({
-        from: 'your-email@gmail.com',  // Use a valid email address
-        to: email,
-        subject: 'Your One-Time Password (OTP)',
-        text: `Your OTP is: ${otp}`,
-      });
-      res.status(200).json({ message: 'OTP sent to your email' });
-    } catch (error) {
-      // Log the error and return a detailed error message
-      console.error('Error sending OTP:', error);
-
-      // Check if it's an error with nodemailer or other issues
-      if (error instanceof Error) {
-        return res.status(500).json({ message: 'Error during login', error: error.message });
-      }
-
-      // Generic fallback for unexpected errors
-      return res.status(500).json({ message: 'An unknown error occurred during login' });
-    }
-  });
-
-  application.post('/verify-otp', (req: Request, res: Response) => {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({ error: 'Email and OTP are required' });
-    }
-
-    const otpRecord = pendingOTP[email];
-
-    // Check if OTP exists and is still valid (not expired)
-    if (!otpRecord || Date.now() > otpRecord.expiresAt) {
-      return res.status(400).json({ error: 'OTP expired or not found' });
-    }
-
-    // Verify OTP
-    if (otp === otpRecord.otp) {
-      // OTP is correct, delete it from the pending OTP store
-      delete pendingOTP[email];
-      return res.status(200).json({ message: 'OTP verified successfully, access granted' });
-    } else {
-      return res.status(400).json({ error: 'Invalid OTP' });
-    }
-  });
+  // Error Handling
 
   logging.log("----------------------------------------");
   logging.log("Define Routing Error");
@@ -171,15 +115,10 @@ const Main = async () => {
   logging.log("----------------------------------------");
   httpServer = http.createServer(application);
   httpServer.listen(server.SERVER_PORT, () => {
-    logging.log("----------------------------------------");
-    logging.log(
-      `Server started on ${server.SERVER_HOSTNAME}:${server.SERVER_PORT}`
-    );
-    logging.log("----------------------------------------");
+    logging.log(`Server started on ${server.SERVER_HOSTNAME}:${server.SERVER_PORT}`);
   });
 };
 
-export const Shutdown = (callback: any) =>
-  httpServer && httpServer.close(callback);
+export const Shutdown = (callback: any) => httpServer && httpServer.close(callback);
 
 Main();
