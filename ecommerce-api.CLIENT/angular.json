@@ -40,21 +40,25 @@
       {
         "replace": "src/environments/environment.ts",
         "with": "src/environments/environment.prod.ts"
-      }
-    ],
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "20kb",
-                  "maximumError": "30kb"
-                }
-              ],
-              "outputHashing": "all"
+       }
+  ],
+  "optimization": true,
+  "extractLicenses": true,
+  "sourceMap": false,
+  "namedChunks": false,
+  "outputHashing": "all",
+  "budgets": [
+    {
+      "type": "initial",
+      "maximumWarning": "2mb",
+      "maximumError": "5mb"
+    },
+    {
+      "type": "anyComponentStyle",
+      "maximumWarning": "20kb",
+      "maximumError": "30kb"
+    }
+              ]
             },
             "development": {
               "optimization": false,
