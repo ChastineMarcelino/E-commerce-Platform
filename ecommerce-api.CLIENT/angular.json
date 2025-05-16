@@ -40,30 +40,26 @@
       {
         "replace": "src/environments/environment.ts",
         "with": "src/environments/environment.prod.ts"
-       }
-  ],
-  "optimization": true,
-  "extractLicenses": true,
-  "sourceMap": false,
-  "namedChunks": false,
-  "outputHashing": "all",
-  "budgets": [
-    {
-      "type": "initial",
-      "maximumWarning": "2mb",
-      "maximumError": "5mb"
-    },
-    {
-      "type": "anyComponentStyle",
-      "maximumWarning": "20kb",
-      "maximumError": "30kb"
-    }
-              ]
+      }
+    ],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "20kb",
+                  "maximumError": "30kb"
+                }
+              ],
+              "outputHashing": "all"
             },
             "development": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
+              "optimization": true,
+              "extractLicenses": true,
+              "sourceMap": false
             }
           },
           "defaultConfiguration": "production"
