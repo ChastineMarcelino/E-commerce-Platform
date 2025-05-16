@@ -103,6 +103,15 @@ const Main = async () => {
   application.use("/api/v1", defaultMaterialRoutes);
   
 
+// ✅ NEW (correct):
+application.use(express.static(path.join(__dirname, '../ecommerce-api.CLIENT/dist/ecommerce-api.client/browser')));
+
+// And for index.html redirect:
+application.get('*', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../ecommerce-api.CLIENT/dist/ecommerce-api.client/browser/index.html'));
+});
+
+
   // Error Handling
 
   logging.log("----------------------------------------");
