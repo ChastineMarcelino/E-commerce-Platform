@@ -12,7 +12,7 @@
 
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,            // ✅ REQUIRED for reflect-metadata
-    "types": ["reflect-metadata"]             // ✅ Include typings
+  "types": ["node"]          // ✅ Include typings
   },
   "exclude": ["node_modules/"],
   "include": ["src/**/*.ts", "test/**/*.ts"]
