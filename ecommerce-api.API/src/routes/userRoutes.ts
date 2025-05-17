@@ -21,7 +21,6 @@ declare global {
 const profileStorage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, "uploads/profile-images"),
   filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
     const sanitized = file.originalname.replace(/\s+/g, '-').toLowerCase();
     cb(null, `${Date.now()}-${sanitized}`);
   },
@@ -124,7 +123,7 @@ router.delete("/api/users/:id/reject", authMiddleware, userController.rejectUser
  * Apply the base routes to user management routes
  */
 
-router.get("/api/staff-members", authMiddleware, async (req, res) => {
+router.get("/api/staff-members", authMiddleware, async (_req: express.Request, res: express.Response) => {
   try {
     const staff = await User.find({
       role: { $in: ["Staff", "ADMIN"] },
