@@ -4,8 +4,9 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "outDir": "build",
     "forceConsistentCasingInFileNames": true,
+      "outDir": "dist",
+    "rootDir": "src",
 
     "strict": true,
     "skipLibCheck": true,

@@ -4,8 +4,8 @@
   "description": "This API is about invetory management",
   "main": "src/server.ts",
   "scripts": {
-    "start": "ts-node src/server.ts",
-    "dev": "nodemon src/server .ts",
+    "start": "node dist/server.js",
+    "dev": "nodemon src/server.ts",
     "build": "tsc",
     "test": "echo \"No test specified\" && exit 0"
   },
@@ -46,6 +46,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/otp-generator": "^4.0.2",
     "@types/redis": "^4.0.10",
+    "@types/reflect-metadata": "^0.0.5",
     "@types/string-similarity": "^4.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"

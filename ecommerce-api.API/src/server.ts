@@ -76,7 +76,7 @@ const Main = async () => {
   logging.log("----------------------------------------");
   application.use(loggingHandler);
   application.use(cors({
-   origin: process.env.FRONTEND_ORIGIN || "*",// ✅ Allow Angular frontend
+   origin: 'e-commerce-platform-gjfi5pxoq-chastine-marcelinos-projects.vercel.app',
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
   }));
@@ -103,13 +103,6 @@ const Main = async () => {
   application.use("/api/v1", defaultMaterialRoutes);
   
 
-// ✅ NEW (correct):
-application.use(express.static(path.join(__dirname, '../ecommerce-api.CLIENT/dist/ecommerce-api.client/browser')));
-
-// And for index.html redirect:
-application.get('*', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../ecommerce-api.CLIENT/dist/ecommerce-api.client/browser/index.html'));
-});
 
 
   // Error Handling
