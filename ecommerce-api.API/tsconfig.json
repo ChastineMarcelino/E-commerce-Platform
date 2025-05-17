@@ -3,16 +3,16 @@
     "target": "ES6",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "outDir": "build",
     "forceConsistentCasingInFileNames": true,
-    "outDir": "dist",
-    "rootDir": "src",
+
     "strict": true,
     "skipLibCheck": true,
+    "types": ["reflect-metadata"],
     "moduleResolution": "Node16",
     "module": "Node16"
   },
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules/"],
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }

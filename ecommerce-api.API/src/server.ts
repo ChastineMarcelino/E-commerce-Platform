@@ -76,7 +76,7 @@ const Main = async () => {
   logging.log("----------------------------------------");
   application.use(loggingHandler);
   application.use(cors({
-   origin: 'e-commerce-platform-gjfi5pxoq-chastine-marcelinos-projects.vercel.app',
+    origin: "http://localhost:4200", // ✅ Allow Angular frontend
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
   }));
@@ -102,8 +102,6 @@ const Main = async () => {
   application.use(webhookRoutes);
   application.use("/api/v1", defaultMaterialRoutes);
   
-
-
 
   // Error Handling
 

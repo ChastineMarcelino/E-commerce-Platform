@@ -69,11 +69,11 @@ class AuthController {
         
         password,
         role: isAdmin ? "ADMIN" : "STAFF",
-         isVerified: isAdmin,
+        isVerified: false,
         isApproved: false,
         otp: otpCode, // ✅ Save OTP in database
         otpExpires: Date.now() + 5 * 60 * 1000, // ✅ Expire in 5 minutes
-        status: isAdmin ? "Active" : "Pending",
+        status: "Pending",
         createdAt: new Date(),
         updatedAt: new Date(),
       });
