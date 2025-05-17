@@ -19,7 +19,6 @@ import paymentRoutes from "./routes/paymentRoutes";
 import supplierRoutes from "./routes/supplierRoutes";
 import authRoutes from "./routes/authRoutes";
 import webhookRoutes from "./routes/webhookRoutes";
-import "reflect-metadata";
 import cors from "cors";
 import { loggingHandler } from "./Middleware/loggingHandler";
 import { routeNotFound } from "./Middleware/routeNotFound";
