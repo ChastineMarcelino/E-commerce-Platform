@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES6",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "outDir": "build",
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "types": ["node"]
+    "emitDecoratorMetadata": true,            // ✅ REQUIRED for reflect-metadata
+  "types": ["node"]          // ✅ Include typings
   },
   "exclude": ["node_modules/"],
   "include": ["src/**/*.ts", "test/**/*.ts"]
