@@ -10,8 +10,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "types": ["node"]
+    "emitDecoratorMetadata": true
   },
   "exclude": ["node_modules"],
   "include": ["src/**/*.ts", "test/**/*.ts"]
