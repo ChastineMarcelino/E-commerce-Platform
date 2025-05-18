@@ -75,7 +75,7 @@ const Main = async () => {
   logging.log("----------------------------------------");
   application.use(loggingHandler);
   application.use(cors({
-    origin: "http://localhost:4200", // ✅ Allow Angular frontend
+    origin: "e-commerce-platform-gjfi5pxoq-chastine-marcelinos-projects.vercel.app", // ✅ Allow Angular frontend
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
   }));
