@@ -4,12 +4,12 @@
   "description": "This API is about invetory management",
   "main": "src/server.ts",
   "scripts": {
-  "start": "ts-node src/server.ts",
-  "dev": "nodemon src/server.ts",
-  "build": "tsc",
-  "postinstall": "npm install @types/node --no-save",
-  "test": "echo \"No test specified\" && exit 0"
-},
+    "start": "ts-node src/server.ts",
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "postinstall": "npm install @types/node --no-save",
+    "test": "echo \"No test specified\" && exit 0"
+  },
   "author": "Chastine Marcelino, Mark Paul Parafine, Jastine Marcelino",
   "license": "ISC",
   "dependencies": {
@@ -35,7 +35,6 @@
     "string-similarity": "^4.0.4",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
-        
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
