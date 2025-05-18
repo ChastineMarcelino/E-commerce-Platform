@@ -75,7 +75,8 @@ const Main = async () => {
   logging.log("----------------------------------------");
   application.use(loggingHandler);
   application.use(cors({
- origin: "https://e-commerce-platform-gjfi5pxoq-chastine-marcelinos-projects.vercel.app",
+origin: "https://e-commerce-platform-6pzjoyjrb-chastine-marcelinos-projects.vercel.app",
+
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
   }));
