@@ -11,7 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "typeRoots": ["./node_modules/@types"]
+    "types": ["node"]
   },
   "exclude": ["node_modules"],
   "include": ["src/**/*.ts", "test/**/*.ts"]
