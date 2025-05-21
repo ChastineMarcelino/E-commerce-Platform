@@ -14,7 +14,8 @@ export class UserService {
     if (!token) return throwError(() => new Error('No token found'));
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-  return this.http.get(`${environment.apiUrl}/api/users/profile`, { headers });
+return this.http.get(`https://e-commerce-platform-2-nybj.onrender.com/api/users/profile`, { headers });
+
 
   }
 }
