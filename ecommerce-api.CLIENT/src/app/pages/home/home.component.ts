@@ -61,7 +61,8 @@ export class HomeComponent implements OnInit {
     if (!token) return;
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    this.http.get<any>('http://localhost:3000/api/users/profile', { headers })
+this.http.get<any>('https://e-commerce-platform-2-nybj.onrender.com/api/users/profile', { headers })
+
     .subscribe({
       next: user => {
         this.userName = user.fullName;
@@ -85,7 +86,8 @@ export class HomeComponent implements OnInit {
     const formData = new FormData();
     formData.append('image', file);
 
-    this.http.put<any>('http://localhost:3000/api/users/profile/upload', formData, {
+this.http.put<any>('https://e-commerce-platform-2-nybj.onrender.com/api/users/profile/upload', formData, {
+
       headers: {
         Authorization: `Bearer ${token}`
       }
