@@ -12,7 +12,8 @@ import { Router } from '@angular/router';
 import { HttpHeaders } from '@angular/common/http';
 import { UserService } from '../../services/user.service';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment.prod';
+import { environment } from '../../../environments/environment';
+
 
 
 
