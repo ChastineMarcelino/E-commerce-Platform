@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class UserService {
+  apiUrl: any;
   constructor(private http: HttpClient) {}
 
   getProfile(): Observable<any> {
@@ -14,7 +15,7 @@ export class UserService {
     if (!token) return throwError(() => new Error('No token found'));
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-  return this.http.get(`${environment.apiUrl}/api/users/profile`, { headers });
+  return this.http.get(`${this.apiUrl}/api/users/profile`, { headers });
 
   }
 }
