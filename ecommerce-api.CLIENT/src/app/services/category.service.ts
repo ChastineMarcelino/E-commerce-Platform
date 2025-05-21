@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
-  private apiUrl = 'https://e-commerce-platform-2-nybj.onrender.com/categories';
+  private apiUrl = 'https://e-commerce-platform-2-nybj.onrender.com/api/categories';
 
   constructor(private http: HttpClient) {}
 
