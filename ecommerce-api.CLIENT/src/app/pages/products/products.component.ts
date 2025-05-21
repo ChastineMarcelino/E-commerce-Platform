@@ -202,13 +202,20 @@ fetchCategories() {
     }
   });
 }
-  fetchProducts() {
-    this.productService.getProducts().subscribe((data: any[]) => {
-      const products = data.map(product => ({ ...product, id: product._id }));
-      this.products = products;
-      this.filterByCategory(this.selectedCategory);
-    });
-  }
+ fetchProducts() {
+  this.productService.getProducts().subscribe((data: any[]) => {
+    const products = data.map(product => ({
+      ...product,
+      id: product._id,
+      imageUrl: product.imageUrl.startsWith('http')
+        ? product.imageUrl
+        : `https://e-commerce-platform-2-nybj.onrender.com/${product.imageUrl}`
+    }));
+    this.products = products;
+    this.filterByCategory(this.selectedCategory);
+  });
+}
+
 
   filterByCategory(category: string): void {
     this.selectedCategory = category;
