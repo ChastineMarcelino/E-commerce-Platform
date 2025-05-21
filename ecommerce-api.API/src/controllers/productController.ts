@@ -17,7 +17,6 @@ export class ProductController extends BaseController<IProduct> {
     super(Product as any);
   }
 
-  // ✅ Get all products with filtering, sorting, and full-text search
   public async getProducts(req: Request, res: Response): Promise<void> {
     try {
       const { sort, search, category } = req.query;
@@ -40,30 +39,25 @@ export class ProductController extends BaseController<IProduct> {
     }
   }
 
-  // ✅ Get a product by ID
   public async getProductById(req: Request, res: Response): Promise<void> {
     try {
       const product = await Product.findById(req.params.id);
-
       if (!product) {
         res.status(404).json({ message: "Product not found" });
         return;
       }
-
       res.json(product);
     } catch (error: any) {
       res.status(500).json({ message: "Server error", error: error.message });
     }
   }
 
-  // ✅ Create product with validation (supports addOns)
   public async create(req: Request, res: Response): Promise<void> {
     try {
-      // ✅ Parse addOns from string if present
       if (typeof req.body.addOns === "string") {
         try {
           req.body.addOns = JSON.parse(req.body.addOns);
-        } catch (e) {
+        } catch {
           req.body.addOns = [];
         }
       }
@@ -80,6 +74,13 @@ export class ProductController extends BaseController<IProduct> {
         return;
       }
 
+      // ✅ Set image URL if file is uploaded
+      if (req.file) {
+        const protocol = req.protocol;
+        const host = req.get("host");
+        req.body.imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+      }
+
       req.body = payload;
       await super.create(req, res);
     } catch (error: any) {
@@ -87,14 +88,12 @@ export class ProductController extends BaseController<IProduct> {
     }
   }
 
-  // ✅ Update product with validation (supports addOns)
   public async update(req: Request, res: Response): Promise<void> {
     try {
-      // ✅ Parse addOns from string if present
       if (typeof req.body.addOns === "string") {
         try {
           req.body.addOns = JSON.parse(req.body.addOns);
-        } catch (e) {
+        } catch {
           req.body.addOns = [];
         }
       }
@@ -109,6 +108,13 @@ export class ProductController extends BaseController<IProduct> {
       if (existingProduct) {
         res.status(400).json({ message: "Product name already exists" });
         return;
+      }
+
+      // ✅ Update image URL if new file uploaded
+      if (req.file) {
+        const protocol = req.protocol;
+        const host = req.get("host");
+        req.body.imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
       }
 
       req.body = payload;
