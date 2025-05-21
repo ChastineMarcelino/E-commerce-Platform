@@ -12,9 +12,6 @@ import { Router } from '@angular/router';
 import { HttpHeaders } from '@angular/common/http';
 import { UserService } from '../../services/user.service';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-
-
 
 
 @Component({
@@ -205,21 +202,13 @@ fetchCategories() {
     }
   });
 }
-fetchProducts() {
-  this.productService.getProducts().subscribe((data: any[]) => {
-    const products = data.map(product => ({
-      ...product,
-      id: product._id,
-      imageUrl: product.imageUrl.startsWith('http')
-        ? product.imageUrl
-        : `${environment.imageBaseUrl}${product.imageUrl}`
-    }));
-    this.products = products;
-    this.filterByCategory(this.selectedCategory);
-  });
-}
-
-
+  fetchProducts() {
+    this.productService.getProducts().subscribe((data: any[]) => {
+      const products = data.map(product => ({ ...product, id: product._id }));
+      this.products = products;
+      this.filterByCategory(this.selectedCategory);
+    });
+  }
 
   filterByCategory(category: string): void {
     this.selectedCategory = category;
