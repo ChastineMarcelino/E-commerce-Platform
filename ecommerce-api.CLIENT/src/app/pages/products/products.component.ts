@@ -12,6 +12,8 @@ import { Router } from '@angular/router';
 import { HttpHeaders } from '@angular/common/http';
 import { UserService } from '../../services/user.service';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment.prod';
+
 
 
 @Component({
@@ -202,19 +204,20 @@ fetchCategories() {
     }
   });
 }
- fetchProducts() {
+fetchProducts() {
   this.productService.getProducts().subscribe((data: any[]) => {
     const products = data.map(product => ({
       ...product,
       id: product._id,
       imageUrl: product.imageUrl.startsWith('http')
         ? product.imageUrl
-        : `https://e-commerce-platform-2-nybj.onrender.com/${product.imageUrl}`
+        : `${environment.imageBaseUrl}${product.imageUrl}`
     }));
     this.products = products;
     this.filterByCategory(this.selectedCategory);
   });
 }
+
 
 
   filterByCategory(category: string): void {
