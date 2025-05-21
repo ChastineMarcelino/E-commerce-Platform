@@ -42,8 +42,7 @@
     <div #carousel class="product-carousel">
       <div class="product-card" *ngFor="let product of filteredProducts" (click)="openOrderModal(product)">
         <span class="price-tag">PRICE {{ product.medioPrice }} / {{ product.grandePrice }}</span>
-       <img [src]="'https://e-commerce-platform-2-nybj.onrender.com/uploads/' + product.imageUrl" alt="{{ product.name }}" />
-
+        <img [src]="product.imageUrl" alt="{{ product.name }}" />
         <h3>{{ product.name }}</h3>
         <p>{{ product.description }}</p>
 
