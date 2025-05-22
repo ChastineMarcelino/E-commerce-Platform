@@ -111,11 +111,11 @@ export class ProductController extends BaseController<IProduct> {
       }
 
       // ✅ Update image URL if new file uploaded
-      if (req.file) {
-        const protocol = req.protocol;
-        const host = req.get("host");
-        req.body.imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
-      }
+     if (req.file) {
+  const protocol = req.get('host')?.includes('localhost') ? 'http' : 'https';
+  const host = req.get("host");
+  req.body.imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+}
 
       req.body = payload;
       await super.update(req, res);
