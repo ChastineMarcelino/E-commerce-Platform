@@ -112,7 +112,8 @@ export class ProductController extends BaseController<IProduct> {
 
       // ✅ Update image URL if new file uploaded
      if (req.file) {
-  const protocol = req.get('host')?.includes('localhost') ? 'http' : 'https';
+const protocol = 'https'; // always use HTTPS in production
+
   const host = req.get("host");
   req.body.imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
 }
