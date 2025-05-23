@@ -97,11 +97,12 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
 
      // ✅ Redirect based on OTP source
      if (this.source === 'reset' && res.accessToken) {
-      localStorage.setItem('token', res.accessToken);
+   localStorage.setItem('authToken', res.accessToken);
       this.router.navigate(['/home']);
-    } else {
+       return; // ✅ STOP here to avoid falling to login
+    } 
       this.router.navigate(['/login']);
-    }
+    
   },
   error: (err) => {
     this.showMessage(err.error.message || 'Invalid OTP', 'error');

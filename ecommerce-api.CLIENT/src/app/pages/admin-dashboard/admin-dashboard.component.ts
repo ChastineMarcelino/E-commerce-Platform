@@ -74,7 +74,7 @@ addCategory() {
   
   // Delete category
   deleteCategory(id: string) {
-  if (!confirm('Delete this category?')) return;
+
 
   this.categoryService.deleteCategory(id).subscribe({
     next: () => {
@@ -93,20 +93,26 @@ addCategory() {
     this.selectedStaff = null;
   }
   
-  deleteStaff(id: string) {
-    if (!confirm("Are you sure you want to delete this staff member?")) return;
-  
-    this.adminService.deleteStaff(id).subscribe({
-      next: () => {
-        this.showMessage("✅ Staff member deleted successfully.", 'success');
-        this.staffMembers = this.staffMembers.filter(member => member._id !== id);
-        this.closeStaffPopup();
-      },
-      error: () => {
-        this.showMessage("❌ Failed to delete staff member.", 'error');
-      }
-    });
-  }
+    deleteStaff(id: string) {
+
+
+  this.adminService.deleteStaff(id).subscribe({
+    next: () => {
+      this.snackBar.open("✅ Staff member deleted successfully.", 'Close', {
+        duration: 3000,
+        panelClass: ['snackbar-success']
+      });
+      this.staffMembers = this.staffMembers.filter(member => member._id !== id);
+      this.closeStaffPopup();
+    },
+    error: () => {
+      this.snackBar.open("❌ Failed to delete staff member.", 'Close', {
+        duration: 3000,
+        panelClass: ['snackbar-error']
+      });
+    }
+  });
+}
   
   ngOnInit(): void {
     this.loadPendingUsers();
@@ -194,7 +200,7 @@ console.log("🧪 ID used in PUT:", this.selectedInventoryItem._id);
 
 
 deleteInventoryItem(id: string): void {
-  if (!confirm('Are you sure you want to delete this inventory item?')) return;
+  
 
   this.adminService.deleteInventoryItem(id).subscribe({
     next: () => {
@@ -210,7 +216,7 @@ deleteInventoryItem(id: string): void {
 
 
 deleteOrder(id: string): void {
-  if (!confirm('Are you sure you want to delete this order?')) return;
+  
 
   this.orderService.deleteOrder(id).subscribe({
     next: () => {
